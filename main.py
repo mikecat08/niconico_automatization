@@ -152,10 +152,17 @@ while True:
   # 次の一覧ページへ遷移するボタンをクリック
   next_btn = driver.find_element(By.XPATH, "//*[@id='UploadedInfiniteScrollTarget']/nav/div/nav/ul/li[9]/button")
   
-  next_btn.click()
-  time.sleep(1)
+  # 次の一覧ページへ遷移するボタンのclassを取得
+  next_btn_class = next_btn.get_attribute('class')
 
-  if i > 8:
+  if "Mui-disabled" in next_btn_class:
+    break
+
+  else:
+    next_btn.click()
+    time.sleep(1)
+
+  if i > 100:
     break
 
 

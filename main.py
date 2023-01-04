@@ -100,8 +100,6 @@ while True:
 
   # 現在のページのURLを取得
   cur_url = driver.current_url
-  print("▼現在のURL")
-  print(cur_url)
 
   for mov in driver.find_elements(By.CLASS_NAME, "css-1gf8rdn"):
     option_btn = mov.find_element(By.CLASS_NAME, "MuiButtonBase-root")
@@ -120,18 +118,19 @@ while True:
   # 申請画面
   # ====================================
 
-  print(cpp_urls)
-
   for cpp in cpp_urls:
 
     # クリエイター奨励プログラムへの参加ページへ遷移
     driver.get(cpp)
     time.sleep(1)
 
-    ttl = driver.find_element(By.XPATH, "/html/head/title")
-    print(ttl.text)
+    # id Column01を持つdiv要素の中の1番上の要素のclassを取得
+    col01_ttl = driver.find_element(By.XPATH, "//*[@id='Column01']/div")
+    col01_ttl_class = col01_ttl.get_attribute('class')
+    print(col01_ttl_class)
 
-    if "この作品から" in ttl.text:
+    # id Column01を持つdiv要素の中の1番上の要素のclassがapply-msgだった時のみ以下の処理を実行
+    if col01_ttl_class == "apply-msg":
 
       # チュートリアルを下までスクロール
       tutorial = driver.find_element(By.ID, "tutorial")
@@ -155,7 +154,7 @@ while True:
   next_btn.click()
   time.sleep(1)
 
-  if i > 7:
+  if i > 2:
     break
 
 

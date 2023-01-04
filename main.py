@@ -1,14 +1,22 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome import service as fs
 import time
 import getpass
 
-driver = webdriver.Chrome('./driver/chromedriver')
+CHROMEDRIVER = "./driver/chromedriver"
+chrome_service = fs.Service(executable_path=CHROMEDRIVER)
+driver = webdriver.Chrome(service=chrome_service)
 driver.set_window_size(1200,800)
+
+# 要素が見つかるまで、最大30秒間待機する
+driver.implicitly_wait(30)
 
 # ニコニコのログイン画面を開く
 driver.get('https://account.nicovideo.jp/login')
+
+# ページの読み込みが完了するまで待機
 time.sleep(1)
 
 
@@ -80,20 +88,79 @@ time.sleep(1)
 # 動画一覧
 # ====================================
 
-# for mov in driver.find_elements(By.CLASS_NAME, "css-1gf8rdn"):
-#   option_btn = mov.find_element(By.CLASS_NAME, "MuiButtonBase-root")
-#   option_btn.click()
+# ループ処理用の変数を用意
+i = 0
 
-#   # 収入を得るボタンをクリック
-#   cpp_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/div/ul/li[7]/a")
-#   cpp_btn.click()
+while True:
+  i = i + 1
+  time.sleep(1)
 
-#   # 作品にもどるボタンがある場合はクリック
-#   if driver.find_element(By.LINK_TEXT, "作品にもどる"):
-#     driver.find_element(By.LINK_TEXT, "作品にもどる").click()
+  # リンク先を格納するための空のリスト型を用意
+  cpp_urls = []
+
+  # 現在のページのURLを取得
+  cur_url = driver.current_url
+  print("▼現在のURL")
+  print(cur_url)
+
+  for mov in driver.find_elements(By.CLASS_NAME, "css-1gf8rdn"):
+    option_btn = mov.find_element(By.CLASS_NAME, "MuiButtonBase-root")
+    option_btn.click()
+
+    # 収入を得るボタンのリンク先URLをリスト型に格納
+    cpp_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/div/ul/li[7]/a")
+    cpp_btn_url = cpp_btn.get_attribute('href')
+    cpp_urls.append(cpp_btn_url)
+
+    search_box = driver.find_element(By.NAME, "keyword")
+    search_box.click()
+
+
+  # ====================================
+  # 申請画面
+  # ====================================
+
+  print(cpp_urls)
+
+  for cpp in cpp_urls:
+
+    # クリエイター奨励プログラムへの参加ページへ遷移
+    driver.get(cpp)
+    time.sleep(1)
+
+    ttl = driver.find_element(By.XPATH, "/html/head/title")
+    print(ttl.text)
+
+    if "この作品から" in ttl.text:
+
+      # チュートリアルを下までスクロール
+      tutorial = driver.find_element(By.ID, "tutorial")
+      driver.execute_script("arguments[0].scrollTo(0, document.body.scrollHeight);", tutorial)
+
+      # チェックボックスをクリック
+      check_box = driver.find_element(By.XPATH, "//*[@id='Column01']/div[3]/form/p/label/span")
+      check_box.click()
+
+      # 申請ボタンをクリックする
+      apply_btn = driver.find_element(By.LINK_TEXT, "作品収入を申請する")
+      apply_btn.click()
+
+  # 元の一覧ページに戻る
+  driver.get(cur_url)
+  time.sleep(1)
+
+  # 次の一覧ページへ遷移するボタンをクリック
+  next_btn = driver.find_element(By.XPATH, "//*[@id='UploadedInfiniteScrollTarget']/nav/div/nav/ul/li[9]/button")
+  
+  next_btn.click()
+  time.sleep(1)
+
+  if i > 7:
+    break
+
 
 # ブラウザを閉じる
-# driver.close()
+driver.close()
 
 
 

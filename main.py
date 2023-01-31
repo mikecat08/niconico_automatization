@@ -1,3 +1,4 @@
+import chromedriver_binary
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -5,9 +6,17 @@ from selenium.webdriver.chrome import service as fs
 import time
 import getpass
 
-CHROMEDRIVER = "./driver/chromedriver"
-chrome_service = fs.Service(executable_path=CHROMEDRIVER)
-driver = webdriver.Chrome(service=chrome_service)
+# CHROMEDRIVER = "./driver/chromedriver"
+# chrome_service = fs.Service(executable_path=CHROMEDRIVER)
+# driver = webdriver.Chrome(service=chrome_service)
+
+options = webdriver.ChromeOptions()
+# options.add_argument('--headless')
+
+print('connectiong to remote browser...')
+driver = webdriver.Chrome(options=options)
+
+# ブラウザのサイズを指定
 driver.set_window_size(1200,800)
 
 # 要素が見つかるまで、最大30秒間待機する
@@ -91,6 +100,7 @@ time.sleep(1)
 # 一覧の表示件数を100件に切り替える
 pulldown_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/section/nav[1]/div/div[2]/div")
 pulldown_btn.click()
+time.sleep(1)
 mov_num_100 = driver.find_element(By.XPATH, "//*[@id='menu-']/div[3]/ul/li[4]")
 mov_num_100.click()
 

@@ -88,6 +88,16 @@ time.sleep(1)
 # 動画一覧
 # ====================================
 
+# 一覧の表示件数を100件に切り替える
+pulldown_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/section/nav[1]/div/div[2]/div")
+pulldown_btn.click()
+mov_num_100 = driver.find_element(By.XPATH, "//*[@id='menu-']/div[3]/ul/li[4]")
+mov_num_100.click()
+
+
+# 現在のページのURLを取得
+cur_url = driver.current_url
+
 # ループ処理用の変数を用意
 i = 0
 
@@ -98,21 +108,20 @@ while True:
   # リンク先を格納するための空のリスト型を用意
   cpp_urls = []
 
-  # 現在のページのURLを取得
-  cur_url = driver.current_url
-  print(cur_url)
-
-  for mov in driver.find_elements(By.CLASS_NAME, "css-1gf8rdn"):
+  # 各動画の収益化登録ページのURLを繰り返し取得する処理
+  for mov in driver.find_elements(By.CLASS_NAME, "css-hgmrya"):
     option_btn = mov.find_element(By.CLASS_NAME, "MuiButtonBase-root")
     option_btn.click()
 
     # 収入を得るボタンのリンク先URLをリスト型に格納
-    cpp_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/div/div/ul/li[7]/a")
+    cpp_btn = driver.find_element(By.XPATH, "/html/body/div[3]/div[3]/ul/a[7]")
     cpp_btn_url = cpp_btn.get_attribute('href')
     cpp_urls.append(cpp_btn_url)
 
-    search_box = driver.find_element(By.NAME, "keyword")
-    search_box.click()
+    # 背景エリアをクリックすることでモーダルを消す
+    # これをしないと次の動画のオプションボタンをクリックすることができない
+    backdrop_root = driver.find_element(By.CLASS_NAME, "MuiBackdrop-root")
+    backdrop_root.click()
 
 
   # ====================================
@@ -122,8 +131,8 @@ while True:
   for cpp in cpp_urls:
 
     # クリエイター奨励プログラムへの参加ページへ遷移
-    time.sleep(1)
     driver.get(cpp)
+    time.sleep(1)
 
     # id Column01を持つdiv要素の中の1番上の要素のclassを取得
     col01_ttl = driver.find_element(By.XPATH, "//*[@id='Column01']/div")
@@ -131,14 +140,14 @@ while True:
     print(col01_ttl_class)
 
     # id Column01を持つdiv要素の中の1番上の要素のclassがapply-msgだった時のみ以下の処理を実行
-    if "apply-msg" in col01_ttl_class:
+    if col01_ttl_class == "apply-msg":
 
       # チュートリアルを下までスクロール
       tutorial = driver.find_element(By.ID, "tutorial")
       driver.execute_script("arguments[0].scrollTo(0, document.body.scrollHeight);", tutorial)
 
       # チェックボックスをクリック
-      check_box = driver.find_element(By.XPATH, "//*[@id='Column01']/div[3]/form/p/label/span")
+      check_box = driver.find_element(By.ID, "checkerid")
       check_box.click()
 
       # 申請ボタンをクリックする
@@ -149,20 +158,23 @@ while True:
   driver.get(cur_url)
   time.sleep(1)
 
-  # 次の一覧ページへ遷移するボタンをクリック
-  next_btn = driver.find_element(By.XPATH, "//*[@id='UploadedInfiniteScrollTarget']/nav/div/nav/ul/li[9]/button")
-  
-  # 次の一覧ページへ遷移するボタンのclassを取得
-  next_btn_class = next_btn.get_attribute('class')
-
-  if "Mui-disabled" in next_btn_class:
-    break
-
-  else:
+  # ループ回数に応じた数だけ次の一覧ページへ遷移する繰り返し処理
+  for j in range(i):
+    # 次の一覧ページへ遷移するボタンを取得
+    next_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/section/nav[2]/div/nav/ul/li[9]/button")
     next_btn.click()
     time.sleep(1)
 
-  if i > 100:
+  # 次の一覧ページへ遷移するボタンのclassを取得
+  next_btn = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div/section/nav[2]/div/nav/ul/li[9]/button")
+  next_btn_class = next_btn.get_attribute('class')
+
+  # 次へボタンのクラスにMui-disabledが含まれている場合はループを終了する
+  if "Mui-disabled" in next_btn_class:
+    break
+
+  # ループが20回以上ループした場合もループを終了する
+  if i > 20:
     break
 
 
